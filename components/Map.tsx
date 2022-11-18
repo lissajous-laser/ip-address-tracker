@@ -1,19 +1,31 @@
-import { MapContainer, TileLayer, Marker, Popup} from 'react-leaflet'
-import styles from '../styles/Map.module.scss'
+import { Stint_Ultra_Condensed } from '@next/font/google';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl} from 'react-leaflet';
+import sty from '../styles/Map.module.scss';
+import {QueryResult} from '../resources/types';
+import markerIcon from '../public/images/icon-location.svg';
+import L from 'leaflet';
+
+const blackMarker = new L.Icon({
+  iconUrl: '../public/images/icon-location.svg',
+  iconSize: [46, 56],
+  iconAnchor: [23, 55],
+});
 
 
-export default function Map() {
+export default function Map({lat, lng}: {lat: number, lng: number}) {
   return (
-    <MapContainer className={styles.map} center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+    <MapContainer
+      className={sty.map}
+      center={[lat, lng]}
+      zoom={12}
+      scrollWheelZoom={true}
+      zoomControl={false}
+    >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={[51.505, -0.09]}>
-        <Popup>
-          A pretty CSS3 popup. <br /> Easily customizable.
-        </Popup>
-      </Marker>
+      <ZoomControl position='bottomleft'/>
+      <Marker position={[lat, lng]}/>
     </MapContainer>
   );
 }

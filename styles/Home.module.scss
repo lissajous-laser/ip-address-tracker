@@ -93,6 +93,7 @@ $border-r: 13px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  filter: drop-shadow(0 2px, 2px, grey);
 }
 
 .panelLeft, .panelRight {
@@ -175,6 +176,9 @@ $border-r: 13px;
     display: flex;
     font-size: 26px;
     margin-top: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: '...';
   }
 
   .h2 {

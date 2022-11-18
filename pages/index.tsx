@@ -5,38 +5,61 @@ import {Rubik} from '@next/font/google';
 import arrowRight from '../public/images/icon-arrow.svg';
 import bgImg from '../public/images/pattern-bg.png';
 import sty from '../styles/Home.module.scss';
-import React, {useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup} from 'react-leaflet'
+import React, {useState} from 'react';
+import {MapContainer, TileLayer, Marker, Popup} from 'react-leaflet'
+import {QueryResult} from '../resources/types';
 
 
 const rubik = Rubik({
-  weight: ['400', '500', '700']
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  display: 'block', 
 });
 
-type query = {
-  ipAddr: string,
-  location: string,
-  tz: string,
-  isp: string,
 
-}
 
 export default function Home() {
   const [txtInputState, setTxtInputState] = useState('');
-  const [query, setQuery] = useState({})
+  const [queryResult, setQueryResult] = useState<QueryResult>({
+    ip: '209.51.188.116',
+    region: 'Florida',
+    city: 'Sarasota',
+    lat: 27.33643,
+    lng: -82.53065,
+    postalCode: '34230',
+    timezone: '-05:00',
+    isp: 'Hurricane Electric LLC'
+  })
 
-  const formSubmitHandler = (event: React.FormEvent<HTMLFormElement>) => {
+  const formSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const sanitisedInput = txtInputState.trim();
     const domainNameRe: RegExp
       = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
-    const ipifyApiAddr = 'https://geo.ipify.org/api/v2/country';
+    const ipifyApiAddr = 'https://geo.ipify.org/api/v2/country,city';
     const apiKey = 'at_eGGETT5lnXLxPtBt1hr0FoS3yyWui';
     let getUrl: string;
+
     if (domainNameRe.test(sanitisedInput)) {
       getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&domain=${sanitisedInput}`;
     } else {
       getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&ipAddress=${sanitisedInput}`;
+    }
+
+    const response = await fetch(getUrl);
+    if (response.ok) {
+      const jsonResponse = await response.json();
+      setQueryResult({
+        ip: jsonResponse.ip,
+        region: jsonResponse.location.region,
+        city: jsonResponse.location.city,
+        lat: jsonResponse.location.lat,
+        lng: jsonResponse.location.lng,
+        postalCode: jsonResponse.location.postalCode,
+        timezone: jsonResponse.location.timezone,
+        isp: jsonResponse.isp        
+      });
+      console.log(JSON.stringify(jsonResponse));
     }
   }
 
@@ -47,20 +70,13 @@ export default function Home() {
   const Map = dynamic(() =>
     import('../components/Map'), {ssr: false}
   );
-    
-
 
   return (
     <div className={sty.container}>
       <Head>
         <title>IP Address Tracker</title>
         <link rel="icon" href="/favicon-32x32.png"/>
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
-          integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
-          crossOrigin=""
-        />
+
       </Head>
       <main className={rubik.className}> 
         {/* Absolutely positioned, displayed on top of 
@@ -72,9 +88,9 @@ export default function Home() {
           <form className={sty.inputAndButton} onSubmit={formSubmitHandler}>
             <input
               className={sty.txtInput}
-              pattern='hello'
               placeholder='Search for any IP address or domain'
               onChange={inputChangeHandler}
+              value={txtInputState}
             />
             <button className={sty.button}>
               <Image src={arrowRight} alt={'Arrow'}/>
@@ -84,14 +100,14 @@ export default function Home() {
             <div className={sty.panelLeft}>
               <article className={sty.stat}>
                 <h2 className={sty.h2}>IP ADDRESS</h2>
-                <div className={sty.value}>192.212.174.101</div>
+                <div className={sty.value}>{queryResult.ip}</div>
               </article>
               <div className={sty.separatorLn}></div>
               <article className={sty.stat}>
                 <h2 className={sty.h2}>LOCATION</h2>
                 <div className={sty.value}>
-                  <div>Brooklyn, NY&nbsp;</div>
-                  <div>10001</div>
+                  <div>{queryResult.city},&nbsp;</div>
+                  <div>{queryResult.region} {queryResult.postalCode}</div>
                 </div>
               </article>
               <div className={sty.separatorLnMid}></div>
@@ -99,23 +115,24 @@ export default function Home() {
             <div className={sty.panelRight}>
               <article className={sty.stat}>
                 <h2 className={sty.h2}>TIMEZONE</h2>
-                <div className={sty.value}>UTC -05:00</div>       
+                <div className={sty.value}>UTC {queryResult.timezone}</div>
               </article>
               <div className={sty.separatorLn}></div>
               <article className={sty.stat}>
                 <h2 className={sty.h2}>ISP</h2>
-                <div className={sty.value}>
-                  <div>SpaceX&nbsp;</div>
-                  <div>Starlink</div>
-                </div>
+                <div className={sty.value}>{queryResult.isp}</div>
                 
               </article>
             </div>
           </div>
         </div>
         <div className={sty.layer0}>
-          <Image className={sty.bgImg} src={bgImg} alt='Decorative map background'/>
-          <Map/>
+          <Image
+            className={sty.bgImg}
+            src={bgImg}
+            alt='Decorative map background'
+          />
+          <Map lat={queryResult.lat} lng={queryResult.lng}/>
         </div>
       </main>
     </div>
