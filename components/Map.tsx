@@ -1,9 +1,7 @@
-import { Stint_Ultra_Condensed } from '@next/font/google';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl} from 'react-leaflet';
-import sty from '../styles/Map.module.scss';
-import {QueryResult} from '../resources/types';
-import markerIcon from '../public/images/icon-location.svg';
 import L from 'leaflet';
+import { MapContainer, TileLayer, Marker, ZoomControl} from 'react-leaflet';
+import markerIcon from '../public/images/icon-location.svg';
+import sty from '../styles/Map.module.scss';
 
 const blackMarker = new L.Icon({
   iconUrl: '../public/images/icon-location.svg',
@@ -13,6 +11,7 @@ const blackMarker = new L.Icon({
 
 
 export default function Map({lat, lng}: {lat: number, lng: number}) {
+
   return (
     <MapContainer
       className={sty.map}

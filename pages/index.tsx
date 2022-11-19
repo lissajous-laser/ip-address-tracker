@@ -1,21 +1,14 @@
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
-import {Rubik} from '@next/font/google';
+import React, {useState} from 'react';
+import Stat from '../components/Stat';
 import arrowRight from '../public/images/icon-arrow.svg';
 import bgImg from '../public/images/pattern-bg.png';
-import sty from '../styles/Home.module.scss';
-import React, {useState} from 'react';
-import {MapContainer, TileLayer, Marker, Popup} from 'react-leaflet'
+import {domainNameRe} from '../resources/constants';
+import {rubik} from '../resources/fonts';
 import {QueryResult} from '../resources/types';
-
-
-const rubik = Rubik({
-  weight: ['400', '500', '700'],
-  subsets: ['latin'],
-  display: 'block', 
-});
-
+import sty from '../styles/Home.module.scss';
 
 
 export default function Home() {
@@ -34,8 +27,6 @@ export default function Home() {
   const formSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const sanitisedInput = txtInputState.trim();
-    const domainNameRe: RegExp
-      = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
     const ipifyApiAddr = 'https://geo.ipify.org/api/v2/country,city';
     const apiKey = 'at_eGGETT5lnXLxPtBt1hr0FoS3yyWui';
     let getUrl: string;
@@ -46,20 +37,26 @@ export default function Home() {
       getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&ipAddress=${sanitisedInput}`;
     }
 
-    const response = await fetch(getUrl);
-    if (response.ok) {
-      const jsonResponse = await response.json();
-      setQueryResult({
-        ip: jsonResponse.ip,
-        region: jsonResponse.location.region,
-        city: jsonResponse.location.city,
-        lat: jsonResponse.location.lat,
-        lng: jsonResponse.location.lng,
-        postalCode: jsonResponse.location.postalCode,
-        timezone: jsonResponse.location.timezone,
-        isp: jsonResponse.isp        
-      });
-      console.log(JSON.stringify(jsonResponse));
+    try {
+      const response = await fetch(getUrl);
+      if (response.ok) {
+        const jsonResponse = await response.json();
+
+        setQueryResult({
+          ip: jsonResponse.ip,
+          region: jsonResponse.location.region,
+          city: jsonResponse.location.city,
+          lat: jsonResponse.location.lat,
+          lng: jsonResponse.location.lng,
+          postalCode: jsonResponse.location.postalCode,
+          timezone: jsonResponse.location.timezone,
+          isp: jsonResponse.isp        
+        });
+        
+        setTxtInputState('');
+      }
+    } catch (e) {
+    
     }
   }
 
@@ -98,31 +95,20 @@ export default function Home() {
           </form>
           <div className={sty.panelFull}>
             <div className={sty.panelLeft}>
-              <article className={sty.stat}>
-                <h2 className={sty.h2}>IP ADDRESS</h2>
-                <div className={sty.value}>{queryResult.ip}</div>
-              </article>
-              <div className={sty.separatorLn}></div>
-              <article className={sty.stat}>
-                <h2 className={sty.h2}>LOCATION</h2>
-                <div className={sty.value}>
-                  <div>{queryResult.city},&nbsp;</div>
-                  <div>{queryResult.region} {queryResult.postalCode}</div>
-                </div>
-              </article>
-              <div className={sty.separatorLnMid}></div>
+              <Stat name='IP ADDRESS' value={queryResult.ip}/>
+              <div className={sty.separatorLn}/>
+              <Stat
+                name='LOCATION' 
+                value={
+                  queryResult.city + ', '
+                  + queryResult.region}
+              />
+              <div className={sty.separatorLnMid}/>
             </div>
             <div className={sty.panelRight}>
-              <article className={sty.stat}>
-                <h2 className={sty.h2}>TIMEZONE</h2>
-                <div className={sty.value}>UTC {queryResult.timezone}</div>
-              </article>
-              <div className={sty.separatorLn}></div>
-              <article className={sty.stat}>
-                <h2 className={sty.h2}>ISP</h2>
-                <div className={sty.value}>{queryResult.isp}</div>
-                
-              </article>
+              <Stat name='TIMEZONE' value={'UTC ' + queryResult.timezone}/>
+              <div className={sty.separatorLn}/>
+              <Stat name='ISP' value={queryResult.isp}/>
             </div>
           </div>
         </div>
