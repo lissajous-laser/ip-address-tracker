@@ -19,6 +19,7 @@ export default function Map({lat, lng}: {lat: number, lng: number}) {
       zoom={12}
       scrollWheelZoom={true}
       zoomControl={false}
+      // fadeAnimation={false}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

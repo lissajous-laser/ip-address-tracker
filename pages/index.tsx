@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Image from 'next/image';
 import React, {useState} from 'react';
+import Form from '../components/Form';
 import Stat from '../components/Stat';
 import arrowRight from '../public/images/icon-arrow.svg';
 import bgImg from '../public/images/pattern-bg.png';
@@ -12,7 +13,6 @@ import sty from '../styles/Home.module.scss';
 
 
 export default function Home() {
-  const [txtInputState, setTxtInputState] = useState('');
   const [queryResult, setQueryResult] = useState<QueryResult>({
     ip: '209.51.188.116',
     region: 'Florida',
@@ -24,75 +24,25 @@ export default function Home() {
     isp: 'Hurricane Electric LLC'
   })
 
-  const formSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const sanitisedInput = txtInputState.trim();
-    const ipifyApiAddr = 'https://geo.ipify.org/api/v2/country,city';
-    const apiKey = 'at_eGGETT5lnXLxPtBt1hr0FoS3yyWui';
-    let getUrl: string;
-
-    if (domainNameRe.test(sanitisedInput)) {
-      getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&domain=${sanitisedInput}`;
-    } else {
-      getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&ipAddress=${sanitisedInput}`;
-    }
-
-    try {
-      const response = await fetch(getUrl);
-      if (response.ok) {
-        const jsonResponse = await response.json();
-
-        setQueryResult({
-          ip: jsonResponse.ip,
-          region: jsonResponse.location.region,
-          city: jsonResponse.location.city,
-          lat: jsonResponse.location.lat,
-          lng: jsonResponse.location.lng,
-          postalCode: jsonResponse.location.postalCode,
-          timezone: jsonResponse.location.timezone,
-          isp: jsonResponse.isp        
-        });
-        
-        setTxtInputState('');
-      }
-    } catch (e) {
-    
-    }
-  }
-
-  const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTxtInputState(event.target.value);
-  }
-
   const Map = dynamic(() =>
     import('../components/Map'), {ssr: false}
   );
 
   return (
-    <div className={sty.container}>
+    <div className={rubik.className}>
       <Head>
         <title>IP Address Tracker</title>
         <link rel="icon" href="/favicon-32x32.png"/>
 
       </Head>
-      <main className={rubik.className}> 
-        {/* Absolutely positioned, displayed on top of 
-        backgound image and map */}
+      <main className={sty.contentContainer}> 
+        {/* .layer1 absolutely positioned, displayed on top
+        of backgound image and map */}
         <div className={sty.layer1}> 
           <h1 className={sty.h1}>
             IP Address Tracker
           </h1>
-          <form className={sty.inputAndButton} onSubmit={formSubmitHandler}>
-            <input
-              className={sty.txtInput}
-              placeholder='Search for any IP address or domain'
-              onChange={inputChangeHandler}
-              value={txtInputState}
-            />
-            <button className={sty.button}>
-              <Image src={arrowRight} alt={'Arrow'}/>
-            </button>
-          </form>
+          <Form setQueryResult={setQueryResult}/>
           <div className={sty.panelFull}>
             <div className={sty.panelLeft}>
               <Stat name='IP ADDRESS' value={queryResult.ip}/>
@@ -118,7 +68,9 @@ export default function Home() {
             src={bgImg}
             alt='Decorative map background'
           />
-          <Map lat={queryResult.lat} lng={queryResult.lng}/>
+          <div className={sty.mapWrapper}>
+            <Map lat={queryResult.lat} lng={queryResult.lng}/>
+          </div>
         </div>
       </main>
     </div>
