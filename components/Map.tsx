@@ -15,11 +15,10 @@ export default function Map({lat, lng}: {lat: number, lng: number}) {
   return (
     <MapContainer
       className={sty.map}
-      center={[lat, lng]}
+      center={[lat + 0.02, lng]}
       zoom={12}
       scrollWheelZoom={true}
       zoomControl={false}
-      // fadeAnimation={false}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

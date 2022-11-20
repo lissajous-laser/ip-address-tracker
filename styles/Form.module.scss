@@ -29,6 +29,8 @@
   border: none;
   background-color: black;
   transition: background-color 0.15s linear;
+  margin-top: 0; // for webkit
+  margin-bottom: 0; // for webkit
 }
 
 .button:hover {
