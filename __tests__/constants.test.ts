@@ -25,3 +25,4 @@ test('Domain name with path is false', () => {
 test('Domain name with sub-domain is true', () => {
   expect(domainNameRe.test('api.github.com')).toEqual(true);
 })
+

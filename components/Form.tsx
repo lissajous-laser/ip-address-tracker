@@ -2,12 +2,17 @@ import Image from 'next/image';
 import React, {useState} from 'react';
 import arrowRight from '../public/images/icon-arrow.svg';
 import {domainNameRe} from '../resources/constants';
+// import { apiCall } from '../resources/functions';
 import {QueryResult} from '../resources/types';
 import sty from '../styles/Form.module.scss';
 
-export default function Form({setQueryResult}:
-  {setQueryResult: React.Dispatch<React.SetStateAction<QueryResult>>}
-) {
+export default function Form({
+  setQueryResult,
+  apiCall
+}: {
+  setQueryResult: React.Dispatch<React.SetStateAction<QueryResult>>,
+  apiCall: (getUrl: string) => Promise<any>
+}) {
 
   const [txtInputState, setTxtInputState] = useState('');
 
@@ -28,27 +33,20 @@ export default function Form({setQueryResult}:
       getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&ipAddress=${sanitisedInput}`;
     }
 
-    try {
-      const response = await fetch(getUrl);
-      if (response.ok) {
-        const jsonResponse = await response.json();
+    const jsonResponse = await apiCall(getUrl);
 
-        setQueryResult({
-          ip: jsonResponse.ip,
-          region: jsonResponse.location.region,
-          city: jsonResponse.location.city,
-          lat: jsonResponse.location.lat,
-          lng: jsonResponse.location.lng,
-          postalCode: jsonResponse.location.postalCode,
-          timezone: jsonResponse.location.timezone,
-          isp: jsonResponse.isp        
-        });
-        
-        setTxtInputState('');
-      }
-    } catch (e) {
+    setQueryResult({
+      ip: jsonResponse.ip,
+      region: jsonResponse.location.region,
+      city: jsonResponse.location.city,
+      lat: jsonResponse.location.lat,
+      lng: jsonResponse.location.lng,
+      postalCode: jsonResponse.location.postalCode,
+      timezone: jsonResponse.location.timezone,
+      isp: jsonResponse.isp        
+    });
     
-    }
+    setTxtInputState('');
   }
 
   return (

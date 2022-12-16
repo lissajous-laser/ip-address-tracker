@@ -6,23 +6,15 @@ import Form from '../components/Form';
 import Stat from '../components/Stat';
 import arrowRight from '../public/images/icon-arrow.svg';
 import bgImg from '../public/images/pattern-bg.png';
-import {domainNameRe} from '../resources/constants';
+import {domainNameRe, gnuDomain} from '../resources/constants';
 import {rubik} from '../resources/fonts';
+import { apiCall } from '../resources/functions';
 import {QueryResult} from '../resources/types';
 import sty from '../styles/Home.module.scss';
 
 
 export default function Home() {
-  const [queryResult, setQueryResult] = useState<QueryResult>({
-    ip: '209.51.188.116',
-    region: 'Florida',
-    city: 'Sarasota',
-    lat: 27.33643,
-    lng: -82.53065,
-    postalCode: '34230',
-    timezone: '-05:00',
-    isp: 'Hurricane Electric LLC'
-  })
+  const [queryResult, setQueryResult] = useState<QueryResult>(gnuDomain);
 
   const Map = dynamic(() =>
     import('../components/Map'), {ssr: false}
@@ -42,7 +34,10 @@ export default function Home() {
           <h1 className={sty.h1}>
             IP Address Tracker
           </h1>
-          <Form setQueryResult={setQueryResult}/>
+          <Form
+            setQueryResult={setQueryResult}
+            apiCall={apiCall}
+          />
           <div className={sty.panelFull}>
             <div className={sty.panelLeft}>
               <Stat name='IP ADDRESS' value={queryResult.ip}/>
