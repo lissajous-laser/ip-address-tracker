@@ -9,7 +9,7 @@ import sty from '../styles/Form.module.scss';
 export default function Form({
   setQueryResult,
   apiCall
-}: {
+} : {
   setQueryResult: React.Dispatch<React.SetStateAction<QueryResult>>,
   apiCall: (getUrl: string) => Promise<any>
 }) {
@@ -18,7 +18,7 @@ export default function Form({
 
   const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTxtInputState(event.target.value);
-  }
+    }
 
   const formSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,30 +27,40 @@ export default function Form({
     const apiKey = 'at_eGGETT5lnXLxPtBt1hr0FoS3yyWui';
     let getUrl: string;
 
+    if (!sanitisedInput) {
+      return;
+    }
+
+
     if (domainNameRe.test(sanitisedInput)) {
       getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&domain=${sanitisedInput}`;
     } else {
       getUrl = `${ipifyApiAddr}?apiKey=${apiKey}&ipAddress=${sanitisedInput}`;
     }
 
-    const jsonResponse = await apiCall(getUrl);
+    try {
 
-    setQueryResult({
-      ip: jsonResponse.ip,
-      region: jsonResponse.location.region,
-      city: jsonResponse.location.city,
-      lat: jsonResponse.location.lat,
-      lng: jsonResponse.location.lng,
-      postalCode: jsonResponse.location.postalCode,
-      timezone: jsonResponse.location.timezone,
-      isp: jsonResponse.isp        
-    });
-    
-    setTxtInputState('');
+      const jsonResponse = await apiCall(getUrl);
+      setQueryResult({
+        ip: jsonResponse.ip,
+        region: jsonResponse.location.region,
+        city: jsonResponse.location.city,
+        lat: jsonResponse.location.lat,
+        lng: jsonResponse.location.lng,
+        postalCode: jsonResponse.location.postalCode,
+        timezone: jsonResponse.location.timezone,
+        isp: jsonResponse.isp        
+      });
+      
+      setTxtInputState('');
+
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (
-    <form className={sty.inputAndButton} onSubmit={formSubmitHandler}>
+    <form role='form' className={sty.inputAndButton} onSubmit={formSubmitHandler}>
       <input
         className={sty.txtInput}
         placeholder='Search for any IP address or domain'
@@ -60,6 +70,6 @@ export default function Form({
       <button className={sty.button}>
         <Image src={arrowRight} alt={'Arrow'}/>
       </button>
-  </form>
+    </form>
   );
 }
