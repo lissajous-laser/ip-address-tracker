@@ -38,6 +38,7 @@ test('submitting filled out form calls api endpoint', () => {
   expect(apiCall).toBeCalled();
 });
 
+// TODO: fix test. Fails when text input is empty.
 test('submitting empty form does not call api endpoint', () => {
   fireEvent.submit(screen.getByRole('form'));
 
